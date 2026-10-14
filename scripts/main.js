@@ -2,7 +2,6 @@
 // 1. Ausrüstungs-Insert im Equipment-Reiter des Charakterbogens, gespeichert am Actor.
 // 2. Kästchen und Notizfelder in Move-/Item-Beschreibungen speichern (z. B. Potential for Greatness).
 // 3. Checkboxen in Journal-Textseiten dauerhaft speichern (Nachfolger von „Journal Checkbox Persist“).
-// Plan: Alex Vault/Kampagnen/Stonetop/UlGo Kampagne/Foundry – Umbau-Plan Charakterbögen.md
 
 const MODULE_ID = "stonetop-werkzeuge";
 const FLAG_OUTFIT = "outfit";
