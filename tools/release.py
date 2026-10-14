@@ -6,7 +6,7 @@ import requests
 
 OWNER = "alexanderjuri-design"
 REPO = "foundry-stonetop-werkzeuge"
-SRC = r"D:\Code\foundry-stonetop-werkzeuge"
+SRC = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STEP = sys.argv[1]
 
 
