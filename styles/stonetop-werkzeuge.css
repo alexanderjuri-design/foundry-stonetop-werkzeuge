@@ -40,3 +40,30 @@
   height: 1.4em;
   display: inline-block;
 }
+
+/* Arcana-Karten im Equipment-Reiter */
+.cell--arcana li.item {
+  border: 1px solid var(--color-border-dark, #333);
+  border-radius: 4px;
+  margin-bottom: 0.4em;
+}
+.stw-arcana-back {
+  margin-top: 0.5em;
+  padding-top: 0.3em;
+  border-top: 1px dashed var(--color-border-dark, #333);
+}
+.stw-arcana-back-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+.stw-arcana-back-head button {
+  flex: 0 0 auto;
+  width: auto;
+  line-height: 1.4;
+  padding: 0 0.6em;
+  margin-left: auto;
+}
+.stw-arcana-back.stw-hidden .stw-arcana-back-body {
+  opacity: 0.55;
+}

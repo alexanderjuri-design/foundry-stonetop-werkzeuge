@@ -98,6 +98,11 @@ async function renderOutfit(sheet, root) {
 
 /* ------------------------------------- 2. Felder in Item-Beschreibungen */
 
+// Felder der Beschreibung selbst, ohne die eingeblendete Arcana-Rückseite.
+function descriptionInputs(desc) {
+  return fieldInputs(desc).filter((i) => !i.closest(".stw-arcana-back"));
+}
+
 function bindItemDescriptions(sheet, root) {
   const actor = sheet.actor;
   if (!actor) return;
@@ -105,15 +110,18 @@ function bindItemDescriptions(sheet, root) {
     if (desc.dataset.stwBound) continue;
     desc.dataset.stwBound = "1";
     const itemId = desc.closest("li.item[data-item-id]").dataset.itemId;
-    const inputs = fieldInputs(desc);
+    const inputs = descriptionInputs(desc);
     inputs.forEach((input) => (input.disabled = !actor.isOwner));
+    const arcana = actor.items.get(itemId);
+    if (arcana?.getFlag(MODULE_ID, "backSource")) renderArcanaBack(actor, arcana, desc);
     desc.addEventListener("change", (ev) => {
       const input = ev.target;
       if (!(input instanceof HTMLInputElement) || !["checkbox", "text"].includes(input.type)) return;
+      if (input.closest(".stw-arcana-back")) return;
       ev.stopPropagation();
       const item = actor.items.get(itemId);
       if (!item) return;
-      const index = fieldInputs(desc).indexOf(input);
+      const index = descriptionInputs(desc).indexOf(input);
       enqueue(async () => {
         const html = writeInputIntoHtml(item.system.description, index, input);
         if (html === null) {
@@ -123,9 +131,81 @@ function bindItemDescriptions(sheet, root) {
         await item.update({ "system.description": html }, { render: false });
       });
     });
-    // Klicks in Feldern sollen die Beschreibung nicht zuklappen.
+    // Klicks in Feldern und Knöpfen sollen die Beschreibung nicht zuklappen.
     desc.addEventListener("click", (ev) => {
-      if (ev.target instanceof HTMLInputElement) ev.stopPropagation();
+      if (ev.target instanceof HTMLInputElement || ev.target.closest?.("button")) ev.stopPropagation();
+    });
+  }
+}
+
+/* ------------------------------------------ 2b. Arcana-Rückseite (GM-Freigabe) */
+// Flags am Arcana-Item: backSource (UUID einer Journal-Seite oder eines Items mit dem Rückseitentext),
+// revealed (für Spieler freigegeben), backHtml (Kopie der Rückseite mit gespeicherten Kästchen).
+// Solange nicht freigegeben, liegt der Rückseitentext nur in der GM-Quelle, nicht im Item.
+
+function sourceHtml(doc) {
+  if (!doc) return null;
+  if (doc.documentName === "JournalEntryPage") return doc.text?.content ?? null;
+  if (doc.documentName === "Item") return doc.system?.description ?? null;
+  return null;
+}
+
+async function setArcanaRevealed(item, reveal) {
+  const update = { [`flags.${MODULE_ID}.revealed`]: reveal };
+  if (reveal && !item.getFlag(MODULE_ID, "backHtml")) {
+    const html = sourceHtml(await fromUuid(item.getFlag(MODULE_ID, "backSource")));
+    if (!html) {
+      ui.notifications.warn(`„${item.name}“: Rückseite nicht gefunden.`);
+      return;
+    }
+    update[`flags.${MODULE_ID}.backHtml`] = html;
+  }
+  await item.update(update);
+}
+
+function renderArcanaBack(actor, item, desc) {
+  const revealed = !!item.getFlag(MODULE_ID, "revealed");
+  if (!revealed && !game.user.isGM) return;
+  const box = document.createElement("div");
+  box.className = "stw-arcana-back" + (revealed ? "" : " stw-hidden");
+  const head = document.createElement("div");
+  head.className = "stw-arcana-back-head";
+  head.innerHTML = `<strong>Rückseite</strong>${revealed ? "" : " <em>(für Spieler verborgen)</em>"}`;
+  if (game.user.isGM) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = revealed ? "Wieder verbergen" : "Für Spieler freigeben";
+    button.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      setArcanaRevealed(item, !revealed);
+    });
+    head.append(button);
+  }
+  const body = document.createElement("div");
+  body.className = "stw-arcana-back-body";
+  box.append(head, body);
+  desc.append(box);
+
+  if (revealed) {
+    body.innerHTML = item.getFlag(MODULE_ID, "backHtml") ?? "";
+    const inputs = fieldInputs(body);
+    inputs.forEach((input) => (input.disabled = !actor.isOwner));
+    body.addEventListener("change", (ev) => {
+      const input = ev.target;
+      if (!(input instanceof HTMLInputElement)) return;
+      ev.stopPropagation();
+      const index = fieldInputs(body).indexOf(input);
+      enqueue(async () => {
+        const html = writeInputIntoHtml(item.getFlag(MODULE_ID, "backHtml"), index, input);
+        if (html !== null) await item.setFlag(MODULE_ID, "backHtml", html);
+      });
+    });
+  } else {
+    // GM-Vorschau aus der Quelle, nicht anklickbar
+    fromUuid(item.getFlag(MODULE_ID, "backSource")).then((doc) => {
+      body.innerHTML = sourceHtml(doc) ?? "<em>Quelle nicht gefunden.</em>";
+      fieldInputs(body).forEach((input) => (input.disabled = true));
     });
   }
 }
