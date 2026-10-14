@@ -72,3 +72,12 @@
 .cell--moves.cell--group:not(:has(li.item)) {
   display: none;
 }
+
+/* Beschreibbare Zeilen im Insert */
+.stw-outfit .stw-outfit-body input.stw-line {
+  width: 60%;
+  min-width: 10em;
+  height: 1.5em;
+  display: inline-block;
+  vertical-align: middle;
+}

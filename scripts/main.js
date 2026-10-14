@@ -5,6 +5,7 @@
 
 const MODULE_ID = "stonetop-werkzeuge";
 const FLAG_OUTFIT = "outfit";
+const FLAG_OUTFIT_TEXT = "outfitText";
 
 let queue = Promise.resolve();
 function enqueue(task) {
@@ -64,12 +65,29 @@ async function renderOutfit(sheet, root) {
   if (collapsed) section.classList.add("collapsed");
   section.innerHTML = `<header><span>Ausrüstung (Inventory Insert)</span><span class="stw-load"></span></header><div class="stw-outfit-body">${template}</div>`;
 
-  const boxes = fieldInputs(section.querySelector(".stw-outfit-body")).filter((i) => i.type === "checkbox");
+  const body = section.querySelector(".stw-outfit-body");
+  const boxes = fieldInputs(body).filter((i) => i.type === "checkbox");
   boxes.forEach((box, i) => {
     box.removeAttribute("checked");
     box.checked = !!state[i];
     box.disabled = !actor.isOwner;
     box.dataset.stwIndex = String(i);
+  });
+  // Textzeilen (z. B. Possessions, Other things): Inhalt je Charakter in einem eigenen Flag
+  const texts = actor.getFlag(MODULE_ID, FLAG_OUTFIT_TEXT) ?? [];
+  fieldInputs(body).filter((i) => i.type === "text").forEach((input, i) => {
+    input.value = texts[i] ?? "";
+    input.removeAttribute("value");
+    input.disabled = !actor.isOwner;
+    input.dataset.stwText = String(i);
+    input.classList.add("stw-line");
+    // Enter speichert, statt das Formular des Bogens abzuschicken
+    input.addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter") {
+        ev.preventDefault();
+        input.blur();
+      }
+    });
   });
   const loadLabel = section.querySelector(".stw-load");
   const updateLoad = () => (loadLabel.textContent = `${countMarked(boxes.map((b) => b.checked))} markiert`);
@@ -81,6 +99,18 @@ async function renderOutfit(sheet, root) {
   });
   section.addEventListener("change", (ev) => {
     const box = ev.target;
+    if (box instanceof HTMLInputElement && box.dataset.stwText !== undefined) {
+      ev.stopPropagation();
+      const index = Number(box.dataset.stwText);
+      const value = box.value;
+      enqueue(async () => {
+        const current = [...(actor.getFlag(MODULE_ID, FLAG_OUTFIT_TEXT) ?? [])];
+        current[index] = value;
+        for (let i = 0; i < current.length; i++) current[i] = current[i] ?? "";
+        await actor.setFlag(MODULE_ID, FLAG_OUTFIT_TEXT, current);
+      });
+      return;
+    }
     if (!(box instanceof HTMLInputElement) || box.dataset.stwIndex === undefined) return;
     ev.stopPropagation();
     const index = Number(box.dataset.stwIndex);
