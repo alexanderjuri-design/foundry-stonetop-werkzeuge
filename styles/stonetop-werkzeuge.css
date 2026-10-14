@@ -1,0 +1,42 @@
+/* Stonetop Werkzeuge: Ausrüstungs-Insert im Equipment-Reiter */
+.stw-outfit {
+  margin: 0 0 0.75em;
+  border-bottom: 2px solid var(--color-border-dark, #333);
+}
+.stw-outfit > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1.1em;
+  padding: 0.25em 0;
+}
+.stw-outfit > header .stw-load {
+  font-weight: normal;
+  font-size: 0.9em;
+}
+.stw-outfit .stw-outfit-body {
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+.stw-outfit.collapsed .stw-outfit-body {
+  display: none;
+}
+.stw-outfit .stw-outfit-body p {
+  margin: 0.15em 0;
+}
+.stw-outfit .stw-outfit-body input[type="checkbox"] {
+  margin: 0 0.15em;
+  vertical-align: middle;
+}
+.stw-outfit .stw-outfit-body h1,
+.stw-outfit .stw-outfit-body h2 {
+  display: none;
+}
+.item-description input[type="text"].stw-note,
+.item-description input[type="text"] {
+  width: 4em;
+  height: 1.4em;
+  display: inline-block;
+}
