@@ -2,7 +2,7 @@
   "id": "stonetop-werkzeuge",
   "title": "Stonetop Werkzeuge",
   "description": "Werkzeuge für Stonetop mit dem pbta-System: Ausrüstungs-Insert im Equipment-Reiter, speicherbare Kästchen und Notizfelder in Moves und Items (z. B. Potential for Greatness), Arcana-Karten mit GM-Freigabe der Rückseite, dauerhafte Checkboxen in Journalen.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "authors": [
     {
       "name": "Alex"
@@ -28,5 +28,5 @@
   ],
   "url": "https://github.com/alexanderjuri-design/foundry-stonetop-werkzeuge",
   "manifest": "https://github.com/alexanderjuri-design/foundry-stonetop-werkzeuge/releases/latest/download/module.json",
-  "download": "https://github.com/alexanderjuri-design/foundry-stonetop-werkzeuge/releases/download/v0.2.0/module.zip"
+  "download": "https://github.com/alexanderjuri-design/foundry-stonetop-werkzeuge/releases/download/v0.2.1/module.zip"
 }

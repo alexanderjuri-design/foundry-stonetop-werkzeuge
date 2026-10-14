@@ -67,3 +67,8 @@
 .stw-arcana-back.stw-hidden .stw-arcana-back-body {
   opacity: 0.55;
 }
+
+/* Leere Move-Gruppen ausblenden; sie erscheinen wieder, sobald ein Move hineingezogen wird. */
+.cell--moves.cell--group:not(:has(li.item)) {
+  display: none;
+}
